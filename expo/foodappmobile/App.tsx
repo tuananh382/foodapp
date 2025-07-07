@@ -1,15 +1,15 @@
-import { useEffect, useState } from 'react';
-import * as React from 'react';
-import { View, Button, Alert, StyleSheet } from 'react-native';
 import axios from 'axios';
-import AuthScreen from './components/AuthScreen';
-import ProductList from './components/ProductList';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
+import { Alert, Button, StyleSheet, View } from 'react-native';
+import AuthScreen from './components/AuthScreen/AuthScreen';
 import Cart from './components/Cart';
 import OrderHistory from './components/OrderHistory';
+import ProductList from './components/ProductList';
 import TrackingMap from './components/TrackingMap';
 import { CartItem, Order, Product } from './types';
 
-const API_URL = 'http://localhost:5000/api'; // Đổi thành IP backend nếu chạy trên thiết bị thật
+const API_URL = 'https://foodapp-d0ov.onrender.com/api'; // Đổi thành IP backend nếu chạy trên thiết bị thật
 
 export default function App() {
   const [user, setUser] = useState<any>(null);
@@ -40,8 +40,8 @@ export default function App() {
   useEffect(() => {
     fetchProducts();
     if (user) {
-      fetchCart(user._id || user.username);
-      fetchOrders(user._id || user.username);
+      fetchCart(user._id);
+      fetchOrders(user._id);
     }
   }, [user]);
 
@@ -51,8 +51,8 @@ export default function App() {
     const idx = newCart.findIndex((item) => item.productId === product.productId);
     if (idx > -1) newCart[idx].quantity += 1;
     else newCart.push({ ...product });
-    await axios.post(`${API_URL}/cart/${user._id || user.username}`, { items: newCart });
-    fetchCart(user._id || user.username);
+    await axios.post(`${API_URL}/cart/${user._id}`, { items: newCart });
+    fetchCart(user._id);
   };
 
   // Đặt hàng
@@ -61,10 +61,10 @@ export default function App() {
     const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const address = '123 Đường ABC, Quận 1, TP.HCM';
     const location = { lat: region.latitude, lng: region.longitude };
-    await axios.post(`${API_URL}/order`, { userId: user._id || user.username, items: cart, total, address, location });
-    await axios.delete(`${API_URL}/cart/${user._id || user.username}`);
-    fetchCart(user._id || user.username);
-    fetchOrders(user._id || user.username);
+    await axios.post(`${API_URL}/order`, { userId: user._id, items: cart, total, address, location });
+    await axios.delete(`${API_URL}/cart/${user._id}`);
+    fetchCart(user._id);
+    fetchOrders(user._id);
     Alert.alert('Đặt hàng thành công!');
   };
 

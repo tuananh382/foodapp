@@ -3,24 +3,43 @@
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+// Brand colors for the food app
+export const BrandColors = {
+  primary: "#FF5722",
+  secondary: "#FF9800",
+  accent: "#4CAF50",
+  background: "#FFFFFF",
+  textPrimary: "#212121",
+  textSecondary: "#757575",
+  divider: "#BDBDBD",
+  success: "#4CAF50",
+  warning: "#FFC107",
+  error: "#F44336",
+  info: "#2196F3",
 
-export const Colors = {
+  // Brand gradient colors
+  primaryGradient: ["#FF5722", "#FF9800"],
+  accentGradient: ["#4CAF50", "#8BC34A"],
+};
+
+const tintColorLight = BrandColors.primary;
+const tintColorDark = "#fff";
+
+export default {
   light: {
-    text: '#11181C',
-    background: '#fff',
+    text: BrandColors.textPrimary,
+    background: BrandColors.background,
     tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
+    tabIconDefault: "#ccc",
     tabIconSelected: tintColorLight,
+    border: BrandColors.divider,
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
+    text: "#fff",
+    background: "#000",
     tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
+    tabIconDefault: "#ccc",
     tabIconSelected: tintColorDark,
+    border: "#444",
   },
 };

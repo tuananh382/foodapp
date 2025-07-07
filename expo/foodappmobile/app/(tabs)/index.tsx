@@ -1,103 +1,76 @@
-import React, { useEffect, useState } from 'react';
-import { View, Button, Alert, StyleSheet } from 'react-native';
 import axios from 'axios';
-import AuthScreen from '../../components/AuthScreen';
-import ProductList from '../../components/ProductList';
-import Cart from '../../components/Cart';
-import OrderHistory from '../../components/OrderHistory';
-import TrackingMap from '../../components/TrackingMap';
+import { Stack } from 'expo-router';
+import React, { useContext, useEffect, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+
+import { endpoints } from '@/config/apiConfig';
+import DashboardScreen from '../../components/Dashboard/DashboardScreen';
 import { CartItem, Order, Product } from '../../types';
+import { AuthContext } from '../_layout';
 
-const API_URL = 'http://192.168.1.11:5000/api'; 
+const API_URL = 'https://foodapp-d0ov.onrender.com/api'; // Update with your actual API URL
 
-export default function HomeScreen() {
-  const [user, setUser] = useState<any>(null);
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [trackingOrder, setTrackingOrder] = useState<Order | null>(null);
-  const [region, setRegion] = useState({ latitude: 10.762622, longitude: 106.660172, latitudeDelta: 0.01, longitudeDelta: 0.01 });
+export default function TabOneScreen() {
+  const { user, setUser } = useContext(AuthContext);
   const [products, setProducts] = useState<Product[]>([]);
+  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
 
-  // Lấy giỏ hàng
-  const fetchCart = async (userId: string) => {
-    const res = await axios.get(`${API_URL}/cart/${userId}`);
-    setCart(res.data?.items || []);
-  };
-
-  // Lấy lịch sử đơn hàng
-  const fetchOrders = async (userId: string) => {
-    const res = await axios.get(`${API_URL}/order/user/${userId}`);
-    setOrders(res.data);
-  };
-
-  // Lấy danh sách sản phẩm từ API
+  // Fetch products
   const fetchProducts = async () => {
-    const res = await axios.get(`${API_URL}/product`);
-    setProducts(res.data);
+    try {
+      const response = await axios.get(`${API_URL}/product`);
+      setProducts(response.data);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+  };
+
+  // Fetch recent orders
+  const fetchRecentOrders = async () => {
+    try {
+      if (user) {
+        const response = await axios.get(`${API_URL}/order/user/${user._id}`);
+        setRecentOrders(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+    }
   };
 
   useEffect(() => {
     fetchProducts();
-    if (user) {
-      fetchCart(user._id || user.username);
-      fetchOrders(user._id || user.username);
-    }
+    fetchRecentOrders();
   }, [user]);
 
-  // Thêm sản phẩm vào giỏ
-  const addToCart = async (product: CartItem) => {
-    const newCart = [...cart];
-    const idx = newCart.findIndex((item) => item.productId === product.productId);
-    if (idx > -1) newCart[idx].quantity += 1;
-    else newCart.push({ ...product });
-    await axios.post(`${API_URL}/cart/${user._id || user.username}`, { items: newCart });
-    fetchCart(user._id || user.username);
-  };
-
-  // Đặt hàng
-  const placeOrder = async () => {
-    if (!cart.length) return Alert.alert('Giỏ hàng trống');
-    const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const address = '123 Đường ABC, Quận 1, TP.HCM';
-    const location = { lat: region.latitude, lng: region.longitude };
-    await axios.post(`${API_URL}/order`, { userId: user._id || user.username, items: cart, total, address, location });
-    await axios.delete(`${API_URL}/cart/${user._id || user.username}`);
-    fetchCart(user._id || user.username);
-    fetchOrders(user._id || user.username);
-    Alert.alert('Đặt hàng thành công!');
-  };
-
-  // Theo dõi đơn hàng (lấy vị trí từ đơn hàng mới nhất)
-  const trackOrder = (order: Order) => {
-    setTrackingOrder(order);
-    if (order.location) {
-      setRegion({
-        latitude: order.location.lat,
-        longitude: order.location.lng,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      });
+  // Add to cart handler
+  const handleAddToCart = async (item: CartItem) => {
+    try {
+      // Add logic to add to cart via API
+      await axios.post(endpoints.addToCart(user._id), item);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
     }
+  };    // Logout handler
+  const handleLogout = async () => {
+    await setUser(null);
   };
-
-  if (!user) {
-    return <AuthScreen onAuthSuccess={setUser} API_URL={API_URL} />;
-  }
 
   return (
     <View style={styles.container}>
-      <ProductList products={products} onAddToCart={addToCart} />
-      <Cart cart={cart} />
-      <Button title="Đặt hàng" onPress={placeOrder} />
-      <OrderHistory orders={orders} onTrack={trackOrder} />
-      {trackingOrder && trackingOrder.location && (
-        <TrackingMap order={trackingOrder} region={region} />
-      )}
-      <Button title="Đăng xuất" onPress={() => setUser(null)} color="red" />
+      <Stack.Screen options={{ headerShown: false }} />
+      <DashboardScreen
+        user={user}
+        products={products}
+        recentOrders={recentOrders}
+        onAddToCart={handleAddToCart}
+        onLogout={handleLogout}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, paddingTop: 40 },
+  container: {
+    flex: 1,
+  },
 });

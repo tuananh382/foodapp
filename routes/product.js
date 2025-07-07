@@ -1,10 +1,10 @@
-const express = require('express');
-const Product = require('../models/Product');
+const express = require("express");
+const Product = require("../models/Product");
 const router = express.Router();
 
 // Lấy tất cả sản phẩm
-router.get('/', async (req, res) => {
-  console.log('✅ /api/product route hit');
+router.get("/", async (req, res) => {
+  console.log("✅ /api/product route hit");
   try {
     const products = await Product.find();
     res.json(products);
@@ -14,9 +14,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-
 // Thêm sản phẩm mới
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const { name, price, image, description } = req.body;
     const product = new Product({ name, price, image, description });
