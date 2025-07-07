@@ -10,6 +10,7 @@ import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { CartProvider } from '../contexts/CartContext';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -55,12 +56,13 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const inAuthGroup = segments[0] === 'auth';
     const inTabsGroup = segments[0] === '(tabs)';
+    const inCheckoutGroup = segments[0] === 'checkout' || segments[0] === 'order-success';
 
     if (!user && !inAuthGroup) {
       // If not logged in and not on auth screen, redirect to auth
       router.replace('/auth');
-    } else if (user && !inTabsGroup) {
-      // If logged in and not in tabs, redirect to tabs
+    } else if (user && !inTabsGroup && !inCheckoutGroup) {
+      // If logged in and not in tabs or checkout, redirect to tabs
       router.replace('/(tabs)');
     }
   }, [user, segments, isLoading, router]);
@@ -110,12 +112,16 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <AuthProvider>
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="auth" options={{ headerShown: false }} />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-          <StatusBar style="auto" />
+          <CartProvider>
+            <Stack>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="auth" options={{ headerShown: false }} />
+              <Stack.Screen name="checkout" options={{ headerShown: false }} />
+              <Stack.Screen name="order-success" options={{ headerShown: false }} />
+              <Stack.Screen name="+not-found" />
+            </Stack>
+            <StatusBar style="auto" />
+          </CartProvider>
         </AuthProvider>
       </ThemeProvider>
     </SafeAreaProvider>

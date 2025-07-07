@@ -20,12 +20,20 @@ export default function OrdersTabScreen() {
         try {
             if (user) {
                 console.log("Fetching orders for user:", user._id);
-                const response = await axios.get(endpoints.getCart(user._id));
-                console.log(response.data);
+                console.log("API URL:", endpoints.getUserOrders(user._id));
+                const response = await axios.get(endpoints.getUserOrders(user._id));
+                console.log("Orders response:", response.data);
                 setOrders(response.data || []);
+            } else {
+                console.log("No user found, cannot fetch orders");
+                setOrders([]);
             }
         } catch (error) {
             console.error('Error fetching orders:', error);
+            if (error.response) {
+                console.error('Error response:', error.response.data);
+                console.error('Error status:', error.response.status);
+            }
             setOrders([]);
         }
     };

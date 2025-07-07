@@ -1,16 +1,37 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform, Text } from 'react-native';
+import { Platform, Text, View, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { HapticTab } from '../../components/HapticTab';
 import TabBarBackground from '../../components/ui/TabBarBackground';
 import Colors from '../../constants/Colors';
+import { useCart } from '../../contexts/CartContext';
 
 // Simple tab icon component since we might not have IconSymbol
 const TabIcon = ({ name, color }: { name: string, color: string }) => (
   <Text style={{ fontSize: 24, color }}>{name}</Text>
 );
+
+// Cart icon with badge
+const CartIcon = ({ color }: { color: string }) => {
+  const { getTotalItems } = useCart();
+  const itemCount = getTotalItems();
+  
+  return (
+    <View style={styles.cartIconContainer}>
+      <Ionicons name="cart-outline" size={24} color={color} />
+      {itemCount > 0 && (
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>
+            {itemCount > 99 ? '99+' : itemCount}
+          </Text>
+        </View>
+      )}
+    </View>
+  );
+};
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -48,7 +69,7 @@ export default function TabLayout() {
         name="cart"
         options={{
           title: 'Cart',
-          tabBarIcon: ({ color }) => <TabIcon name="🛒" color={color} />,
+          tabBarIcon: ({ color }) => <CartIcon color={color} />,
         }}
       />
       <Tabs.Screen
@@ -82,3 +103,26 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  cartIconContainer: {
+    position: 'relative',
+  },
+  badge: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: '#FF4444',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  badgeText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+});
