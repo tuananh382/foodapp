@@ -1,14 +1,10 @@
-import axios from 'axios';
 import { Stack, useRouter } from 'expo-router';
 import React, { useContext, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { endpoints } from '@/config/apiConfig';
 import OrdersScreen from '../../components/OrdersScreen/OrdersScreen';
-import { Order } from '../../types';
+import { Order, orderAPI } from '../../services/api';
 import { AuthContext } from '../_layout';
-
-const API_URL = 'https://foodapp-d0ov.onrender.com/api'; // Update with your actual API URL
 
 export default function OrdersTabScreen() {
     const { user } = useContext(AuthContext);
@@ -20,15 +16,14 @@ export default function OrdersTabScreen() {
         try {
             if (user) {
                 console.log("Fetching orders for user:", user._id);
-                console.log("API URL:", endpoints.getUserOrders(user._id));
-                const response = await axios.get(endpoints.getUserOrders(user._id));
-                console.log("Orders response:", response.data);
-                setOrders(response.data || []);
+                const orders = await orderAPI.getUserOrders(user._id);
+                console.log("Orders response:", orders);
+                setOrders(orders || []);
             } else {
                 console.log("No user found, cannot fetch orders");
                 setOrders([]);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error fetching orders:', error);
             if (error.response) {
                 console.error('Error response:', error.response.data);

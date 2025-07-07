@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { FlatList, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Order } from '../../types';
+import { Order } from '../../services/api';
 import styles from './styles';
 
 // Use regular Image if ExpoImage is causing issues
@@ -145,16 +145,16 @@ export default function OrdersScreen({ orders, onSelectOrder }: OrdersScreenProp
                             <View style={styles.itemsPreview}>
                                 {item.items.slice(0, 3).map((orderItem, index) => (
                                     <View key={index} style={styles.previewItem}>
-                                        {orderItem.image ? (
+                                        {orderItem.product?.image ? (
                                             <Image
-                                                source={{ uri: orderItem.image }}
+                                                source={{ uri: orderItem.product.image }}
                                                 style={styles.previewImage}
                                                 resizeMode="cover"
                                             />
                                         ) : (
                                             <View style={styles.previewPlaceholder}>
                                                 <Text style={styles.previewPlaceholderText}>
-                                                    {orderItem.name && orderItem.name.length > 0 ? orderItem.name[0] : '?'}
+                                                    {orderItem.product?.name && orderItem.product.name.length > 0 ? orderItem.product.name[0] : '?'}
                                                 </Text>
                                             </View>
                                         )}
